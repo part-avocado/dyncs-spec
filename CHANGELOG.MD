@@ -2,7 +2,7 @@
 Version: 0.0.4-DRAFT
 + Finished event payload 
 + Added Identifiers
-= Damn i keep on forgetting to [a] bump the version, [b] change the date, and [c] write the changelod.
+* Damn i keep on forgetting to [a] bump the version, [b] change the date, and [c] write the changelod.
 
 # July 18th, 2026 14:43EDT
 Version: 0.0.3-DRAFT
