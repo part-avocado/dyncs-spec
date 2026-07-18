@@ -1,20 +1,25 @@
+<!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.4-DRAFT` 
+Version: `0.0.5-DRAFT` 
 
 Last Revised: July 18th, 2026
 
+<!-- omit from toc -->
 # Abstract
-
 The Dyanmic Calendaring and Scheduling Format, or known as (DYNCS) is a primarily push-based calendaring and scheduling protocol, designed to have minimal amounts of data be processed. While existing calendar sharing standards such as [iCalendar](https://www.ietf.org/rfc/rfc2445.txt) or [CalDev](https://www.rfc-editor.org/rfc/rfc4791.txt) require a client to periodically fetch and diff an entire collection of events, DYNCS is built around server-initiated delivery of individual event changes with durable per-recipient queue as a fallback for clients that are offline, unreachable, or otherwise unable to acknowledge delivery at time of delivery.
 
 The primary aim for this system is to ensure that a DYNCS client does not need to fetch more that the events it has not seen. This document will specify the data model, delivery state machines, and security considerations sufficients for independent implementations of this system. 
 
 # Table of Contents
+- [Table of Contents](#table-of-contents)
+- [1. Terminology](#1-terminology)
+- [2. Conformance](#2-conformance)
+- [3. Data Model](#3-data-model)
+  - [3.1 Envelope](#31-envelope)
+  - [3.2 Event Payload](#32-event-payload)
+  - [3.3 Identifiers](#33-identifiers)
 
-1. [Terminology](#1-terminology)
-2. [Conformance](#2-conformance)
-3. [Data Model](#3-data-model)
 
 
 

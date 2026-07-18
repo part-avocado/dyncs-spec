@@ -1,4 +1,7 @@
 # July 18th, 2026
+Version: 0.0.5-DRAFT
+* Added arguably better toc using markdown all in one (table of contents)
+
 Version: 0.0.4-DRAFT
 * Changed the TOS to actually link things.
 
