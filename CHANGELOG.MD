@@ -1,9 +1,13 @@
-July 18th, 2026 12:27EDT
+# July 18th, 2026 12:29EDT
+Version: 0.0.2-DRAFT
+* Changed CHANGELOG.txt to CHANGELOG.MD
+
+# July 18th, 2026 12:27EDT
 Version: 0.0.2-DRAFT
 * Changed CHANGELOG.MD to CHANGELOG.txt
 * Changed a typo
 
-July 17th, 2026 18:30EDT
+# July 17th, 2026 18:30EDT
 Version: 0.0.1-DRAFT
 + Added `CHANGELOG.md`
 + Added `SPEC.md`
