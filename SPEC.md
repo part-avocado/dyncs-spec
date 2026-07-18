@@ -1,6 +1,6 @@
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.1-DRAFT` 
+Version: `0.0.2-DRAFT` 
 
 Last Revised: July 17th, 2026
 
@@ -30,5 +30,5 @@ The key words "MUST", "MUST NOT", "SHOULD, "SHOULD NOT", "MAY", and "REQUIRED" i
 - Envelope. Envelopes can be described as a wrapper containing an operation, and event payload, and delivery metadata, which includes but is not limited to `seq`, `event_uid`, `op`, and `issued_at`.
 - Push requests. Push requests are server-initiated delivery of an envelope over a live transport session.
 - Ack. Ack describes the client confirmation that an envelope was successfully received and processed.
-- Outbox. An outbox defines a durable per-device store of envelopes in the server that have not yet been acknowledged
+- Outbox. An outbox defines a durable per-device store of envelopes in the server that have not yet been acknowledged by the client.
 
