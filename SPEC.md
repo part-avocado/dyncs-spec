@@ -1,17 +1,19 @@
-<!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.5-DRAFT` 
+Version: `0.0.7-DRAFT` 
 
 Last Revised: July 18th, 2026
 
-<!-- omit from toc -->
 # Abstract
+
 The Dyanmic Calendaring and Scheduling Format, or known as (DYNCS) is a primarily push-based calendaring and scheduling protocol, designed to have minimal amounts of data be processed. While existing calendar sharing standards such as [iCalendar](https://www.ietf.org/rfc/rfc2445.txt) or [CalDev](https://www.rfc-editor.org/rfc/rfc4791.txt) require a client to periodically fetch and diff an entire collection of events, DYNCS is built around server-initiated delivery of individual event changes with durable per-recipient queue as a fallback for clients that are offline, unreachable, or otherwise unable to acknowledge delivery at time of delivery.
 
 The primary aim for this system is to ensure that a DYNCS client does not need to fetch more that the events it has not seen. This document will specify the data model, delivery state machines, and security considerations sufficients for independent implementations of this system. 
 
 # Table of Contents
+
+- [DYNCS: DYNamic Calendaring and Scheduling Format](#dyncs-dynamic-calendaring-and-scheduling-format)
+- [Abstract](#abstract)
 - [Table of Contents](#table-of-contents)
 - [1. Terminology](#1-terminology)
 - [2. Conformance](#2-conformance)
@@ -19,7 +21,11 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
   - [3.1 Envelope](#31-envelope)
   - [3.2 Event Payload](#32-event-payload)
   - [3.3 Identifiers](#33-identifiers)
-
+- [4. Delivery States](#4-delivery-states)
+  - [4.1 Server States](#41-server-states)
+    - [4.1.1 Server State Transitions](#411-server-state-transitions)
+  - [4.2 Device Sync](#42-device-sync)
+  - [4.3 Timeouts](#43-timeouts)
 
 
 
@@ -67,12 +73,43 @@ All envelopes MUST contain the following fields.
 
 The event payload MUST express, at minimum, the fields present in an iCalendar VEVENT, which are the fields: `summary`, `dtstart`, `dtend` (or `duration`), `organizer`, `attendees`. Servers MAY represent this as JSON rather than raw ICS text, however a server that does so MUST preserve lossless round-trip conversion to/from RFC 5545 VEVENT where reasonable possible.
 
-
-
 ## 3.3 Identifiers
 
 1. `event_uid` MUST be domain-unique and MUST NOT be reused after an event is cancelled.
 2. `seq` MUST be scoped to a single device and MUST NOT be reused, even after acknowledgement or pruning.
-3. `device_id` MUST be unique per device and SHOULD be a client-generated opaque token established at registration time. 
+3. `device_id` MUST be unique per device and SHOULD be a client-generated opaque token established at registration time.
 4. `domain_id` MUST be a globally unique identifier, and MAY be reused only after all recipients no longer subscribe to the domain.
 
+
+
+# 4. Delivery States
+
+For every envelope per device, the envelope MUST have exactly one of the following states.
+
+## 4.1 Server States
+
+- Pending. The pending state is defined where the envelope has been created, but has yet to be attempted to be delivered.
+- Pushed. The pushed state is defined where the envelope has been delivered over a live transport session, but is still waiting for confirmation from the device.
+- Acked. The acked state is defined where the envelope has been received and acknowledged by the device, and has sent a receipt of successful delivery. The server MUST retain a tombstone record, containing the `event_uid`, `seq`, `device_id`, and `acked_at`, rather than deleting the row outright. It is best to retain at least ten (10) acked rows.
+- Unsent. The unsent state is defined where the envelope has been attempted for delivery, but an ack has not been receieved by the device. The envelope MUST remain in the server's outbox until acknowledged.
+
+
+
+### 4.1.1 Server State Transitions
+
+A server may only experience the following state changes for any envelope per device. 
+
+1. Pending to Pushed. A server may change the state from pending to pushed when the envelope has been sent through an open transport session.
+2. Pushed to Acked. A server may change the state from pushed to acked when the device has sent a matching ack to the server within the expiry window.
+3. Pushed to Unsent. A server may change the state from pushed to unsent when the device has NOT sent a matching ack to the server before the timeout.
+4. Unsent to Pushed. A server MAY retry delivery if a transport session becomes available.
+
+
+
+## 4.2 Device Sync
+
+A device MAY sync with the server directly by calling a sync endpoint, and retrieves data starting with device-defined `seq`. In these cases, the requested envelopes should be marked as Pushed, when sent, and Acked, when acknowledged by the device.
+
+## 4.3 Timeouts
+
+The ack timeout is transport-dependent and MUST be documented by each transport binding. A binding SHOULD default to a short window, and MUST be less than 60 seconds for persistent connections. Store-and-forward transports MAY use a longer window if and only if notifications are only used as wake signals.

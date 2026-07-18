@@ -1,4 +1,11 @@
 # July 18th, 2026
+Version: 0.0.7-DRAFT
++ Added section 4
+
+Version: 0.0.6-DRAFT
+- Remove TOC from... TOC
++ Added delivery transitions
+
 Version: 0.0.5-DRAFT
 * Added arguably better toc using markdown all in one (table of contents)
 
@@ -8,7 +15,7 @@ Version: 0.0.4-DRAFT
 Version: 0.0.4-DRAFT
 + Finished event payload 
 + Added Identifiers
-* Damn i keep on forgetting to [a] bump the version, [b] change the date, and [c] write the changelod.
+* Damn i keep on forgetting to [a] bump the version, [b] change the date, and [c] write the changelog.
 
 Version: 0.0.3-DRAFT
 + Added DRAFT: Conformance
