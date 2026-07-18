@@ -6,17 +6,19 @@ Last Revised: July 17th, 2026
 
 # Abstract
 
-The Dyanmic Calendaring and Scheduling Format, or known as (DYNCS) is a primarily push-based calendaring and scheduling protocol, designed to have minimal amounts of data be processed. While existing calendar sharing standards such as [iCalendar](https://www.ietf.org/rfc/rfc2445.txt) or [CalDev](https://www.rfc-editor.org/rfc/rfc4791.txt) require a client to periodically fetch and diff an entire collection of events, DYNCS is built around server-initiated delivery of individual event changes with durable per-recipient queue as a fallback for clients that are offline, unreachable, or otherwise unable to acknowledge delivery in real-time.
+The Dyanmic Calendaring and Scheduling Format, or known as (DYNCS) is a primarily push-based calendaring and scheduling protocol, designed to have minimal amounts of data be processed. While existing calendar sharing standards such as [iCalendar](https://www.ietf.org/rfc/rfc2445.txt) or [CalDev](https://www.rfc-editor.org/rfc/rfc4791.txt) require a client to periodically fetch and diff an entire collection of events, DYNCS is built around server-initiated delivery of individual event changes with durable per-recipient queue as a fallback for clients that are offline, unreachable, or otherwise unable to acknowledge delivery at time of delivery.
 
 The primary aim for this system is to ensure that a DYNCS client does not need to fetch more that the events it has not seen. This document will specify the data model, delivery state machines, and security considerations sufficients for independent implementations of this system. 
 
 # Table of Contents
 
 1. [Terminology](#terminology)
+2. [Conformance](#conformance)
+3. [Data Model](#data-model)
 
 
 
-# Terminology
+# 1. Terminology
 
 The key words "MUST", "MUST NOT", "SHOULD, "SHOULD NOT", "MAY", and "REQUIRED" in this document are to be interpreted as described in RFC 2119.
 
@@ -32,3 +34,31 @@ The key words "MUST", "MUST NOT", "SHOULD, "SHOULD NOT", "MAY", and "REQUIRED" i
 - Ack. Ack describes the client confirmation that an envelope was successfully received and processed.
 - Outbox. An outbox defines a durable per-device store of envelopes in the server that have not yet been acknowledged by the client.
 
+
+
+# 2. Conformance
+
+The conformance section has yet to be writen.
+
+
+
+# 3. Data Model
+
+This section, the data model, defines how data should be structured and processed using the DYNCS Format type.
+
+## 3.1 Envelope
+
+All envelopes MUST contain the following fields.
+
+- seq. seq is a REQUIRED integer that is a motonic cursor per device.
+- event_uid. event_uid is a REQUIRED string that is a stable identifier, which is the same for all recipients.
+- op. op is a enum that is REQUIRED. op may either be `CREATE`, `UPDATE`, or `CANCEL`.
+- payload. payload is a REQUIRED object, but MUST only populated when `CREATE` or `UPDATE` op is passed.
+- issue. issue is a REQUIRED string that defines when the event was created at. This helps eliminate confusion from potential duplicate event_uid strings from different servers and events.
+- device_id. device_id is a REQUIRED string that defines the originator device.
+
+
+
+## 3.2 Event Payload
+
+The event payload MUST express, at minimum, the fields present in an iCalendar VEVENT, which are the fields: `summary`, `dtstart`, `dtend` (or `duration`), `organizer`, `attendees`. Servers MAY represent this as JSON rather than raw ICS text, however a server that does so MUST preserve lossless round-trip conversion to/from RFC 5545 VEVENT where reasonable possible.
