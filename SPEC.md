@@ -1,8 +1,8 @@
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.2-DRAFT` 
+Version: `0.0.4-DRAFT` 
 
-Last Revised: July 17th, 2026
+Last Revised: July 18th, 2026
 
 # Abstract
 
@@ -31,16 +31,15 @@ The key words "MUST", "MUST NOT", "SHOULD, "SHOULD NOT", "MAY", and "REQUIRED" i
 - seq. `seq` or sequence are described as an increasing integer identifying delivery order per device. It should be noted that `seq` is an indication of where delivery should start.
 - Envelope. Envelopes can be described as a wrapper containing an operation, and event payload, and delivery metadata, which includes but is not limited to `seq`, `event_uid`, `op`, and `issued_at`.
 - Push requests. Push requests are server-initiated delivery of an envelope over a live transport session.
-- Ack. Ack describes the client confirmation that an envelope was successfully received and processed.
+- Ack. Ack, short for Acknowledge describes the client confirmation that an envelope was successfully received and processed.
 - Outbox. An outbox defines a durable per-device store of envelopes in the server that have not yet been acknowledged by the client.
+- Domain. A domain is a logical space managed by exactly one (1) server. A domain MUST be managed by exactly one server, while a single server MAY manage more than one domain. For the purposes of this paper, we shall define each domain as having a stab,lle identifying variable `domain_id`. Events, and by extension, their envelopes and relateed information, are scoped to a single domain.
 
 
 
 # 2. Conformance
 
 The conformance section has yet to be writen.
-
-
 
 # 3. Data Model
 
@@ -62,3 +61,13 @@ All envelopes MUST contain the following fields.
 ## 3.2 Event Payload
 
 The event payload MUST express, at minimum, the fields present in an iCalendar VEVENT, which are the fields: `summary`, `dtstart`, `dtend` (or `duration`), `organizer`, `attendees`. Servers MAY represent this as JSON rather than raw ICS text, however a server that does so MUST preserve lossless round-trip conversion to/from RFC 5545 VEVENT where reasonable possible.
+
+
+
+## 3.3 Identifiers
+
+1. `event_uid` MUST be domain-unique and MUST NOT be reused after an event is cancelled.
+2. `seq` MUST be scoped to a single device and MUST NOT be reused, even after acknowledgement or pruning.
+3. `device_id` MUST be unique per device and SHOULD be a client-generated opaque token established at registration time. 
+4. `domain_id` MUST be a globally unique identifier, and MAY be reused only after all recipients no longer subscribe to the domain.
+
