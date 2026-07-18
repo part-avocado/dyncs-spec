@@ -12,9 +12,9 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
 
 # Table of Contents
 
-1. [Terminology](#terminology)
-2. [Conformance](#conformance)
-3. [Data Model](#data-model)
+1. [Terminology](#1-terminology)
+2. [Conformance](#2-conformance)
+3. [Data Model](#3-data-model)
 
 
 
