@@ -1,4 +1,7 @@
 # July 19th, 2026
+Version: 0.0.9-DRAFT
+* Clarification on recipient in section 5
+
 Version: 0.0.8-DRAFT
 + Added section 5
 * locked in

@@ -1,7 +1,7 @@
 <!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.8-DRAFT` 
+Version: `0.0.9-DRAFT` 
 
 Last Revised: July 19th, 2026
 
@@ -33,6 +33,7 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
     - [5.2.1 Ack Message](#521-ack-message)
     - [5.2.2 Sync Request (REST)](#522-sync-request-rest)
   - [5.3 Gap Detection](#53-gap-detection)
+- [6. Multi-Device Management](#6-multi-device-management)
 
 
 
@@ -118,7 +119,7 @@ A device MAY sync with the server directly by calling a sync endpoint, and retri
 The ack timeout is transport-dependent and MUST be documented by each transport binding. A binding SHOULD default to a short window, and MUST be less than 60 seconds for persistent connections. Store-and-forward transports MAY use a longer window if and only if notifications are only used as wake signals.
 
 # 5. Connection Protocol
-The connection protocol is transport-dependent.
+The connection protocol is transport-dependent. In the following cases, the `device_id` described below pertain to the recipient's `device_id`.
 
 ## 5.1 Server to Client
 
@@ -168,4 +169,6 @@ A server presented with this request should return all envelopes in pending or u
 A device with no prior cursor MUST call /sync with since=0 to receive its full backlog. Clients MUST persist the highest seq they have processed as their cursor.
 
 ## 5.3 Gap Detection
-In the event a client receives a push with seq greater than (last known seq + 1), it MUST NOT assume the missing envelopes are nonexistent. The client MUST sync using the [Sync Request Function](#522-sync-request-rest), using `since={last known seq}`
+In the event a client receives a push with seq greater than (last known seq + 1), it MUST NOT assume the missing envelopes are nonexistent. The client MUST sync using the [Sync Request Function](#522-sync-request-rest), using `since={last known seq}`.
+
+# 6. Multi-Device Management
