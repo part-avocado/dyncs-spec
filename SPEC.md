@@ -1,20 +1,20 @@
+<!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.7-DRAFT` 
+Version: `0.0.8-DRAFT` 
 
-Last Revised: July 18th, 2026
+Last Revised: July 19th, 2026
 
+<!-- omit from toc -->
 # Abstract
 
 The Dyanmic Calendaring and Scheduling Format, or known as (DYNCS) is a primarily push-based calendaring and scheduling protocol, designed to have minimal amounts of data be processed. While existing calendar sharing standards such as [iCalendar](https://www.ietf.org/rfc/rfc2445.txt) or [CalDev](https://www.rfc-editor.org/rfc/rfc4791.txt) require a client to periodically fetch and diff an entire collection of events, DYNCS is built around server-initiated delivery of individual event changes with durable per-recipient queue as a fallback for clients that are offline, unreachable, or otherwise unable to acknowledge delivery at time of delivery.
 
 The primary aim for this system is to ensure that a DYNCS client does not need to fetch more that the events it has not seen. This document will specify the data model, delivery state machines, and security considerations sufficients for independent implementations of this system. 
 
+<!-- omit from toc -->
 # Table of Contents
 
-- [DYNCS: DYNamic Calendaring and Scheduling Format](#dyncs-dynamic-calendaring-and-scheduling-format)
-- [Abstract](#abstract)
-- [Table of Contents](#table-of-contents)
 - [1. Terminology](#1-terminology)
 - [2. Conformance](#2-conformance)
 - [3. Data Model](#3-data-model)
@@ -26,6 +26,13 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
     - [4.1.1 Server State Transitions](#411-server-state-transitions)
   - [4.2 Device Sync](#42-device-sync)
   - [4.3 Timeouts](#43-timeouts)
+- [5. Connection Protocol](#5-connection-protocol)
+  - [5.1 Server to Client](#51-server-to-client)
+    - [5.1.1 Push Message](#511-push-message)
+  - [5.2 Client to Server](#52-client-to-server)
+    - [5.2.1 Ack Message](#521-ack-message)
+    - [5.2.2 Sync Request (REST)](#522-sync-request-rest)
+  - [5.3 Gap Detection](#53-gap-detection)
 
 
 
@@ -93,8 +100,6 @@ For every envelope per device, the envelope MUST have exactly one of the followi
 - Acked. The acked state is defined where the envelope has been received and acknowledged by the device, and has sent a receipt of successful delivery. The server MUST retain a tombstone record, containing the `event_uid`, `seq`, `device_id`, and `acked_at`, rather than deleting the row outright. It is best to retain at least ten (10) acked rows.
 - Unsent. The unsent state is defined where the envelope has been attempted for delivery, but an ack has not been receieved by the device. The envelope MUST remain in the server's outbox until acknowledged.
 
-
-
 ### 4.1.1 Server State Transitions
 
 A server may only experience the following state changes for any envelope per device. 
@@ -102,9 +107,7 @@ A server may only experience the following state changes for any envelope per de
 1. Pending to Pushed. A server may change the state from pending to pushed when the envelope has been sent through an open transport session.
 2. Pushed to Acked. A server may change the state from pushed to acked when the device has sent a matching ack to the server within the expiry window.
 3. Pushed to Unsent. A server may change the state from pushed to unsent when the device has NOT sent a matching ack to the server before the timeout.
-4. Unsent to Pushed. A server MAY retry delivery if a transport session becomes available.
-
-
+4. Unsent to Pushed. A server MAY retry delivery if a transport session becomes available. 
 
 ## 4.2 Device Sync
 
@@ -113,3 +116,56 @@ A device MAY sync with the server directly by calling a sync endpoint, and retri
 ## 4.3 Timeouts
 
 The ack timeout is transport-dependent and MUST be documented by each transport binding. A binding SHOULD default to a short window, and MUST be less than 60 seconds for persistent connections. Store-and-forward transports MAY use a longer window if and only if notifications are only used as wake signals.
+
+# 5. Connection Protocol
+The connection protocol is transport-dependent.
+
+## 5.1 Server to Client
+
+### 5.1.1 Push Message
+A push message should be structured in the following format.
+```json
+{
+  "type": "push",
+  "seq": 8842,
+  "event_uid": "evt-3f9a...",
+  "op": "CREATE",
+  "payload": { ... },
+  "issued_at": "2026-07-17T14:02:00Z",
+  "device_id": "dev-a1b2"
+}
+```
+
+## 5.2 Client to Server
+
+### 5.2.1 Ack Message
+An ack message should be structured in the following format.
+```json
+{
+  "type": "ack",
+  "seq": 8842,
+  "device_id": "dev-a1b2"
+}
+```
+
+In all cases, an ack MUST be treated as cumulative. Acking seq N for a given device MUST also acknowledge all outstanding envelopes with $seq \leq N$ for that device. Clients MAY still ack individual out-of-order seq values, but servers MUST accept both forms.
+
+### 5.2.2 Sync Request (REST)
+A previously unavailable client, now being connected to the internet, may perform a HTTPS REST request for catching-up on device. Such request should be formatted as demonstrated below.
+```HTTPS
+GET /sync?device_id={device_id}&since={seq}
+```
+
+A server presented with this request should return all envelopes in pending or unsent state given the requesting device with seq $>$ the given cursor, ordered ascending by seq, as demonstrated below.
+
+```json
+[
+  { "seq": 8842, "event_uid": "...", "op": "CREATE", "payload": {...}, "issued_at": "...", "device_id": "..." },
+  { "seq": 8845, "event_uid": "...", "op": "UPDATE", "payload": {...}, "issued_at": "...", "device_id": "..." }
+]
+```
+
+A device with no prior cursor MUST call /sync with since=0 to receive its full backlog. Clients MUST persist the highest seq they have processed as their cursor.
+
+## 5.3 Gap Detection
+In the event a client receives a push with seq greater than (last known seq + 1), it MUST NOT assume the missing envelopes are nonexistent. The client MUST sync using the [Sync Request Function](#522-sync-request-rest), using `since={last known seq}`
