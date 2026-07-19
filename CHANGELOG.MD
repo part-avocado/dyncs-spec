@@ -1,4 +1,7 @@
 # July 19th, 2026
+Version: 0.0.10-DRAFT
+* Changed some section 5 regarding recipient device id
+
 Version: 0.0.9-DRAFT
 * Clarification on recipient in section 5
 

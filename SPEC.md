@@ -1,7 +1,7 @@
 <!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.9-DRAFT` 
+Version: `0.0.10-DRAFT` 
 
 Last Revised: July 19th, 2026
 
@@ -119,12 +119,12 @@ A device MAY sync with the server directly by calling a sync endpoint, and retri
 The ack timeout is transport-dependent and MUST be documented by each transport binding. A binding SHOULD default to a short window, and MUST be less than 60 seconds for persistent connections. Store-and-forward transports MAY use a longer window if and only if notifications are only used as wake signals.
 
 # 5. Connection Protocol
-The connection protocol is transport-dependent. In the following cases, the `device_id` described below pertain to the recipient's `device_id`.
+The connection protocol is transport-dependent.
 
 ## 5.1 Server to Client
 
 ### 5.1.1 Push Message
-A push message should be structured in the following format.
+A push message should be structured in the following format. In this case, the `device_id` is the originator's `device_id`.
 ```json
 {
   "type": "push",
@@ -133,14 +133,14 @@ A push message should be structured in the following format.
   "op": "CREATE",
   "payload": { ... },
   "issued_at": "2026-07-17T14:02:00Z",
-  "device_id": "dev-a1b2"
+  "device_id": "dev-52fa"
 }
 ```
 
 ## 5.2 Client to Server
 
 ### 5.2.1 Ack Message
-An ack message should be structured in the following format.
+An ack message should be structured in the following format. In this case, the `device_id` is the recipient's `device_id`, who has now acked the envelope.
 ```json
 {
   "type": "ack",
