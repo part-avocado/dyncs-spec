@@ -1,4 +1,11 @@
-# July 19th, 2026
+# Changelog
+
+## July 20th, 2026
+Version: 0.1.0-DRAFT
++ Added stuff regarding multi device
+* Cried silently in pain and suffering 
+
+## July 19th, 2026
 Version: 0.0.10-DRAFT
 * Changed some section 5 regarding recipient device id
 
@@ -10,7 +17,7 @@ Version: 0.0.8-DRAFT
 * locked in
 * gonna watch world cup
 
-# July 18th, 2026
+## July 18th, 2026
 Version: 0.0.7-DRAFT
 + Added section 4
 
@@ -43,7 +50,7 @@ Version: 0.0.2-DRAFT
 * Changed CHANGELOG.MD to CHANGELOG.txt
 * Changed a typo
 
-# July 17th, 2026
+## July 17th, 2026
 Version: 0.0.1-DRAFT
 + Added `CHANGELOG.md`
 + Added `SPEC.md`

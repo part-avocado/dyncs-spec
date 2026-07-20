@@ -32,8 +32,10 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
   - [5.2 Client to Server](#52-client-to-server)
     - [5.2.1 Ack Message](#521-ack-message)
     - [5.2.2 Sync Request (REST)](#522-sync-request-rest)
+    - [5.2.3 Deauthorization Notice](#523-deauthorization-notice)
   - [5.3 Gap Detection](#53-gap-detection)
 - [6. Multi-Device Management](#6-multi-device-management)
+  - [6.1 Device Registration](#61-device-registration)
 
 
 
@@ -166,9 +168,30 @@ A server presented with this request should return all envelopes in pending or u
 ]
 ```
 
-A device with no prior cursor MUST call /sync with since=0 to receive its full backlog. Clients MUST persist the highest seq they have processed as their cursor.
+A device with no prior cursor MUST call /sync with since=0 to receive its full backlog. Clients MUST persist the highest seq they have processed as their cursor. A device MUST perform a sync request AT LEAST ONCE (1 time) per thirty (30) days.
+
+### 5.2.3 Deauthorization Notice
+If a `device_id` is deemed to be no longer valid for a particular recipient identity, the authorization server may send a deauthorization notice. In this case, a server MUST send a PUSH request to the `device_id` 72 hours before anticipated expiry in the following format.
+
+```json
+{
+  "type": "expiry_notice",
+  "op": "NOTICE",
+  "issued_at": "2026-07-17T14:02:00Z",
+  "device_id": "dev-52fa",
+  "expired_for": "2026-07-20T14:02:00Z"
+}
+```
+
+This message MAY have a wake signal, and MUST be stored as the latest message in the `seq`. In order for this expiry to end, the device MUST send either a valid SYNC request OR a reauthorization request.
 
 ## 5.3 Gap Detection
 In the event a client receives a push with seq greater than (last known seq + 1), it MUST NOT assume the missing envelopes are nonexistent. The client MUST sync using the [Sync Request Function](#522-sync-request-rest), using `since={last known seq}`.
 
 # 6. Multi-Device Management
+## 6.1 Device Registration
+A recipient identity MAY register for multiple devices. In these situations, the server MUST keep an active record of the valid recipient identity, as well as its associated `device_id`s. The server also MUST update this list as new `device_id`s sign into the same recipient identity, and the server also MUST actively remove old, signed-out, expired, or outdated `device_id`s. 
+
+An expired `device_id` MUST meet AT LEAST ONE (1) of the following requirements:
+- The `device_id` has been connected with another recipient identity.
+- A `device_id` has not sent a sync request within the past SIXTY (60) days.
