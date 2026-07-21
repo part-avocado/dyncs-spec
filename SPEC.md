@@ -1,9 +1,9 @@
 <!-- omit from toc -->
 # DYNCS: DYNamic Calendaring and Scheduling Format
 
-Version: `0.0.10-DRAFT` 
+Version: `0.1.1-DRAFT` 
 
-Last Revised: July 19th, 2026
+Last Revised: July 21st, 2026
 
 <!-- omit from toc -->
 # Abstract
@@ -36,6 +36,8 @@ The primary aim for this system is to ensure that a DYNCS client does not need t
   - [5.3 Gap Detection](#53-gap-detection)
 - [6. Multi-Device Management](#6-multi-device-management)
   - [6.1 Device Registration](#61-device-registration)
+  - [6.2 Independent Deliveries](#62-independent-deliveries)
+  - [6.3 Device Removal](#63-device-removal)
 
 
 
@@ -195,3 +197,9 @@ A recipient identity MAY register for multiple devices. In these situations, the
 An expired `device_id` MUST meet AT LEAST ONE (1) of the following requirements:
 - The `device_id` has been connected with another recipient identity.
 - A `device_id` has not sent a sync request within the past SIXTY (60) days.
+
+## 6.2 Independent Deliveries
+Delivery states are scoped per device, and MUST NOT be based upon the recipient alone. If Device A acknowledges an envelope, the server MUST NOT modify the delivery state of the same event for Device B, even if they occupy the same recipient identity. Likewise, a slow or offline device MUST NOT block delivery to a recipient's other devices.
+
+## 6.3 Device Removal
+Servers MUST provide a mechanism for a recipient to deregister a device. On removal of the device, the server MAY prune the device's oustanding outbox entries, however it MUST NOT reassign the freed `device_id` or any other unique variable to a new device.

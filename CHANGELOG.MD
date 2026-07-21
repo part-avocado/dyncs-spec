@@ -1,4 +1,7 @@
 # Changelog
+## July 21st, 2026
+Version: 0.1.1-DRAFT
++ Added sections 6.2 and 6.3
 
 ## July 20th, 2026
 Version: 0.1.0-DRAFT
